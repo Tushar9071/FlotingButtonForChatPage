@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --chat-button-bg-primary: #25d366;
+  --chat-button-bg-secondary: #25d366;
+  --brand-bg-primary: #25d366;
+  --brand-bg-secondary: #25d366;
+}

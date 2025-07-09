@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Test</title>
+    <script>
+      // let id = Number(prompt("Enter Your Id"));
+      let id = 1.1;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        window.chatButtonOptions = {
+          id: id,
+          name: "test123",
+          // backgroundprimaryColor: "#25D366",
+          backgroundprimaryColor: "#000000",
+          buttonText: "Chat with us",
+          position: "left",
+        };
+
+        window.brandOptions = {
+          brandName: "xyz",
+          brandImg:
+            "https://raw.githubusercontent.com/Tushar9071/chatbot/refs/heads/main/src/assets/chatIcon.png",
+          welcomeText: "Hi there!\nHow can I help you?",
+          // backgroundprimaryColor: "#25D366",
+          backgroundprimaryColor: "#000000",
+          backgroundsecondaryColor: "#000000",
+          textprimaryColor: "#ffffff",
+          textsecondaryColor: "#000000",
+          buttonText: "Chat with us",
+        };
+
+        var s = document.createElement("script");
+        s.src = "./dist//index.js";
+        s.async = true;
+
+        var x = document.getElementsByTagName("script")[0];
+        x.parentNode.insertBefore(s, x);
+      });
+    </script>
+
+    <!-- <script>
+                var url = 'url';
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.async = true;
+                s.src = url;
+                var options = {
+                "enabled":true,
+                "chatButtonSetting":{
+                    "backgroundColor":"#00e785",
+                    "ctaText":"Chat with us",
+                    "borderRadius":"25",
+                    "marginLeft": "0",
+                    "marginRight": "20",
+                    "marginBottom": "20",
+                    "ctaIconWATI":false,
+                    "position":"right"
+                },
+                "brandSetting":{
+                    "brandName":"xyz",
+                    "brandSubTitle":"undefined",
+                    "brandImg":"img",
+                    "welcomeText":"Hi there!\nHow can I help you?",
+                    "messageText":"Hello, %0A I have a question about {{page_link}}",
+                    "backgroundColor":"#00e785",
+                    "ctaText":"Chat with us",
+                    "borderRadius":"25",
+                    "autoShow":false,
+                    "phoneNumber":"111111111"
+                }
+                };
+                s.onload = function() {
+                    CreateWhatsappChatWidget(options);
+                };
+                var x = document.getElementsByTagName('script')[0];
+                x.parentNode.insertBefore(s, x);
+            </script> -->
+    <!-- <script>
+      var url =
+        "https://wati-integration-prod-service.clare.ai/v2/watiWidget.js?44306";
+      var s = document.createElement("script");
+      s.type = "text/javascript";
+      s.async = true;
+      s.src = url;
+      var options = {
+        enabled: true,
+        chatButtonSetting: {
+          backgroundColor: "#000000",
+          ctaText: "Chat with us",
+          borderRadius: "25",
+          marginLeft: "0",
+          marginRight: "20",
+          marginBottom: "20",
+          ctaIconWATI: false,
+          position: "right",
+        },
+        brandSetting: {
+          brandName: "Wati",
+          brandSubTitle: "undefined",
+          brandImg:
+            "https://www.wati.io/wp-content/uploads/2023/04/Wati-logo.svg",
+          welcomeText: "Hi there!\nHow can I help you?",
+          messageText: "Hello, %0A I have a question about {{page_link}}",
+          backgroundColor: "#000000",
+          ctaText: "Chat with us",
+          borderRadius: "25",
+          autoShow: false,
+          phoneNumber: "7984417885",
+        },
+      };
+      s.onload = function () {
+        CreateWhatsappChatWidget(options);
+      };
+      var x = document.getElementsByTagName("script")[0];
+      x.parentNode.insertBefore(s, x);
+    </script> -->
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <!-- <script>
+    // const fetchData = async () => {
+      // const response = await fetch("https://chatbot-ecru-rho.vercel.app/widget.js");
+    //   const reader = response.body.getReader();
+    //   let result = "";
+
+    //   while (true) {
+    //     const { done, value } = await reader.read();
+    //     if (done) break;
+    //     result += new TextDecoder().decode(value);
+    //   }
+
+    //   return result;
+    // };
+    // // for (i = 0; i < 10000; i++) {
+    // // while(true){
+    //   fetchData().then((data) => {
+    //     // console.log(data);
+    //   });
+    // // }
+    const a = document.getElementById('root');
+    // a.appendChild(document.createElement('h1')).textContent = 'hello';
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => {
+      a.appendChild(document.createElement('h1')).textContent = e;
+    })
+
+  </script> -->
+  </body>
+</html>
