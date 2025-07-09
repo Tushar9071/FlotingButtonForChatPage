@@ -1,0 +1,46 @@
+virtualenv -p python venv   if want to install sepcific version of python use py -3.12
+source venv/bin/activate
+
+pip install -r requirements.txt
+pip freeze > requirements.txt
+
+pip install fastapi pymysql uvicorn sqlalchemy alembic
+
+--->  Run Command  <---
+uvicorn main:app --reload
+
+
+----> Ip Address Used <----
+uvicorn main:app --host 192.168.0.42 --port 8000 --reload
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+uvicorn main:app --host 127.0.0.1 --port 8000
+
+uvicorn main:app --host 192.168.0.42 --port 8000 --reload
+uvicorn main:app --host 192.168.0.42 --port 8000
+
+
+
+Migrations Commands
+
+1. alembic init alembic
+2. alembic.ini --> Add Database Url
+3. alembic/versions/env.py --> import models and Base.metadata
+
+// makemigrations4. alembic revision --autogenerate
+
+// migrate
+5. alembic upgrade head
+
+// scheduler Command
+python services/campaign_schedule.py check_campaign_schedule
+
+python services/campaign_analytics.py 
+python services/trigger_message.py trigger_message 1228 Jeetkasundra 916351829893
+python services/trigger_message.py trigger_message 2148 Denish 919099985324
+
+
+// running port in other tasks error solution
+
+1. netstat -aon | findstr :8000                         // get PID that copy
+2. taskkill /F /PID 1234 or taskkill /PID <PID> /F      // kill the process
+3. Server run command Used
