@@ -5,34 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Widget Test</title>
     <script>
-      // let id = Number(prompt("Enter Your Id"));
       let id = 1.1;
 
       document.addEventListener("DOMContentLoaded", function () {
         window.chatButtonOptions = {
-          id: id,
-          name: "test123",
-          // backgroundprimaryColor: "#25D366",
-          backgroundprimaryColor: "#000000",
+          id: 1.1,
+          backgroundprimaryColor: "#1ec25d",
           buttonText: "Chat with us",
-          position: "left",
+          position: "right",
         };
 
         window.brandOptions = {
-          brandName: "xyz",
+          brandName: "Xyz",
           brandImg:
-            "https://raw.githubusercontent.com/Tushar9071/chatbot/refs/heads/main/src/assets/chatIcon.png",
-          welcomeText: "Hi there!\nHow can I help you?",
-          // backgroundprimaryColor: "#25D366",
-          backgroundprimaryColor: "#000000",
-          backgroundsecondaryColor: "#000000",
+            "https://raw.githubusercontent.com/Tushar9071/FlotingButtonForChatPage/refs/heads/main/frontend/src/assets/liliya_logo.png",
+          welcomeText: `Hi there!
+How can I help you?`,
+          backgroundprimaryColor: "#1ec25d",
+          backgroundsecondaryColor: "#1ec25d",
           textprimaryColor: "#ffffff",
           textsecondaryColor: "#000000",
           buttonText: "Chat with us",
         };
 
         var s = document.createElement("script");
-        s.src = "./dist//index.js";
+        s.src = "./dist/index.js";
         s.async = true;
 
         var x = document.getElementsByTagName("script")[0];

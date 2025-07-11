@@ -24,7 +24,7 @@ Migrations Commands
 
 1. alembic init alembic
 2. alembic.ini --> Add Database Url
-3. alembic/versions/env.py --> import models and Base.metadata
+3. alembic/versions/env.py --> import models and Base.metadata  
 
 // makemigrations4. alembic revision --autogenerate
 
