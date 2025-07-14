@@ -22,6 +22,32 @@ const GenCDNPage = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSaveUserInDatabase = async () => {
+    if (!formData.email || !formData.phone) {
+      alert("Please enter both email and phone number");
+      return;
+    }
+
+    const res = await fetch("http://localhost:8000/api/add/user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        phone: formData.phone,
+        data: {
+          backgroundprimaryColor: formData.backgroundprimaryColor,
+          buttonText: formData.buttonText,
+          position: formData.position,
+          brandName: formData.brandName,
+          brandImg: formData.brandImg,
+          welcomeText: formData.welcomeText,
+        },
+      }),
+    });
+    const data = await res.json();
+    console.log(data);
+  };
+
   return (
     <div className="w-screen p-10">
       <div className="w-full flex justify-center items-center">
@@ -147,8 +173,9 @@ const GenCDNPage = () => {
 
           <div className="text-center">
             <button
-              onClick={() => {
+              onClick={async () => {
                 setShowWidget(true);
+                await handleSaveUserInDatabase();
               }}
               className="px-6 py-2 bg-green-600 text-white font-semibold rounded shadow">
               Generate Widget Code

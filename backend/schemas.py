@@ -2,11 +2,16 @@ from pydantic import BaseModel
 from typing import Optional
 
 class UserBase(BaseModel):
-    name: str
+    # name: Optional[str] = None
     email: Optional[str] = None
+    phone: Optional[int] = None
+    data: Optional[dict] = None
 
 class UserCreate(UserBase):
-    pass
+    # name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[int] = None
+    data: Optional[dict] = None
 
 class UserResponse(UserBase):
     id: int
