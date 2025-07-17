@@ -27,9 +27,10 @@ Migrations Commands
 3. alembic/versions/env.py --> import models and Base.metadata  
 
 // makemigrations4. alembic revision --autogenerate
-
+   alembic -c backend/alembic.ini revision --autogenerate -m "add token column to users"
 // migrate
 5. alembic upgrade head
+   alembic -c backend/alembic.ini upgrade head
 
 // scheduler Command
 python services/campaign_schedule.py check_campaign_schedule

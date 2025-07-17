@@ -7,7 +7,8 @@ const GenWidgetCode = ({ formData }: any) => {
 
   document.addEventListener("DOMContentLoaded", function () {
     window.chatButtonOptions = {
-      id: ${formData.id},
+      id: id,
+      token: "${formData.token}",
       backgroundprimaryColor: "${formData.backgroundprimaryColor}",
       buttonText: "Chat with us",
       position: "${formData.position}",
@@ -34,11 +35,43 @@ const GenWidgetCode = ({ formData }: any) => {
 </script>
 `.trim();
 
+  const htmlBody = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img src="${formData.brandImg}" alt="${
+    formData.brandName
+  }" style="max-height: 50px;"/>
+    <h2 style="color: #333;">Hello from ${formData.brandName} 👋</h2>
+  </div>
+
+  <p style="font-size: 16px; color: #555;">
+    Thank you for choosing our chat widget! Below is your unique script snippet.  
+    Please copy and paste it into your website's <code>&lt;head&gt;</code> section.
+  </p>
+
+  <div style="background: #f9f9f9; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+    <textarea readonly style="width:100%; height:250px; border:none; resize:none; font-family: monospace; font-size:13px; color:#333; background:transparent;">
+${scriptString}
+    </textarea>
+  </div>
+
+  <p style="font-size: 14px; color: #777; text-align: center;">
+    Need help? <a href="mailto:support@example.com" style="color: ${
+      formData.backgroundprimaryColor
+    }; text-decoration: none;">Contact our support</a>
+  </p>
+
+  <div style="text-align: center; font-size: 12px; color: #aaa; margin-top: 20px;">
+    © ${new Date().getFullYear()} ${formData.brandName}. All rights reserved.
+  </div>
+</div>
+
+`;
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(scriptString);
+      await navigator.clipboard.writeText(htmlBody);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -59,7 +92,7 @@ const GenWidgetCode = ({ formData }: any) => {
 
       <div className="h-auto bg-white text-black p-4 rounded overflow-x-auto">
         <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-          {scriptString}
+          {htmlBody}
         </pre>
       </div>
     </div>

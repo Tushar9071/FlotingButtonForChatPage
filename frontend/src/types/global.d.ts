@@ -1,5 +1,6 @@
 export interface ChatButtonOptions {
   id?: number;
+  token?: string;
   name?: string;
   backgroundprimaryColor?: string;
   buttonText?: string;
