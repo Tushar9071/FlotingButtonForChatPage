@@ -1,24 +1,23 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 
-class UserBase(BaseModel):
-    # name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[int] = None
-    data: Optional[dict] = None
 
-class UserCreate(UserBase):
-    # name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[int] = None
-    data: Optional[dict] = None
+class UserCreate(BaseModel):
+    email: str
+    phone: Optional[str] = None
+    data: Optional[Dict] = None
 
-class UserResponse(UserBase):
+
+class UserResponse(BaseModel):
     id: int
+    email: str
+    phone: Optional[str] = None
+    data: Optional[Dict] = None
+    token: str
 
     class Config:
         orm_mode = True
 
-class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
+
+class Token(BaseModel):
+    token: str

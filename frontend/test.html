@@ -5,38 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Widget Test</title>
     <script>
-      let id = 1.1;
-
       document.addEventListener("DOMContentLoaded", function () {
         window.chatButtonOptions = {
-          id: 1.1,
-          backgroundprimaryColor: "#1ec25d",
+          id: "",
+          token: "509e3cc9-7e74-4613-8fbf-2cdaf2e5fb3d",
+          backgroundprimaryColor: "#000000",
           buttonText: "Chat with us",
           position: "right",
         };
-
         window.brandOptions = {
-          brandName: "Xyz",
-          brandImg:
-            "https://raw.githubusercontent.com/Tushar9071/FlotingButtonForChatPage/refs/heads/main/frontend/src/assets/liliya_logo.png",
+          brandName: "Liliya WhatsApp",
+          brandImg: "/src/assets/main-logo-light.png",
           welcomeText: `Hi there!
 How can I help you?`,
-          backgroundprimaryColor: "#1ec25d",
-          backgroundsecondaryColor: "#1ec25d",
+          backgroundprimaryColor: "#25D366",
+          backgroundsecondaryColor: "",
           textprimaryColor: "#ffffff",
           textsecondaryColor: "#000000",
           buttonText: "Chat with us",
         };
-
         var s = document.createElement("script");
         s.src = "./dist/index.js";
         s.async = true;
-
         var x = document.getElementsByTagName("script")[0];
         x.parentNode.insertBefore(s, x);
       });
     </script>
-
     <!-- <script>
                 var url = 'url';
                 var s = document.createElement('script');
@@ -116,33 +110,6 @@ How can I help you?`,
   </head>
 
   <body>
-    <div id="root"></div>
-    <!-- <script>
-    // const fetchData = async () => {
-      // const response = await fetch("https://chatbot-ecru-rho.vercel.app/widget.js");
-    //   const reader = response.body.getReader();
-    //   let result = "";
-
-    //   while (true) {
-    //     const { done, value } = await reader.read();
-    //     if (done) break;
-    //     result += new TextDecoder().decode(value);
-    //   }
-
-    //   return result;
-    // };
-    // // for (i = 0; i < 10000; i++) {
-    // // while(true){
-    //   fetchData().then((data) => {
-    //     // console.log(data);
-    //   });
-    // // }
-    const a = document.getElementById('root');
-    // a.appendChild(document.createElement('h1')).textContent = 'hello';
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => {
-      a.appendChild(document.createElement('h1')).textContent = e;
-    })
-
-  </script> -->
+    <!-- <div id="root"></div> -->
   </body>
 </html>

@@ -15,7 +15,7 @@ const ChatInput = ({ sendButton = false }: { sendButton?: boolean }) => {
     <div className="bottom-0 flex justify-center items-center">
       <div className="bg-white w-full rounded-full overflow-hidden flex items-center px-1 py-1 border border-[#E5E7EB]">
         <button className="mx-2 hover:bg-gray-200 h-7 w-7 rounded-full flex justify-center items-center duration-300 p-1.5">
-          <svg
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
             height="22"
@@ -29,6 +29,32 @@ const ChatInput = ({ sendButton = false }: { sendButton?: boolean }) => {
               color="#667085">
               <circle cx="12" cy="12" r="10" />
               <path d="M8 15a5 5 0 0 0 4 2a5 5 0 0 0 4-2M8.009 9H8m8 0h-.009" />
+            </g>
+          </svg> */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24">
+            <g fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="9.25"
+                stroke="#000"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+              />
+              <circle cx="9" cy="9.5" r="1.25" fill="#000" />
+              <circle cx="15" cy="9.5" r="1.25" fill="#000" />
+              <path
+                stroke="#000"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+                d="M15.464 14.25a4 4 0 0 1-6.928 0"
+              />
             </g>
           </svg>
         </button>
