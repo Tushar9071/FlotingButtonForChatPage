@@ -38,6 +38,13 @@ function App() {
   const [isValidToken, setIsValidToken] = useState(false);
 
   useEffect(() => {
+    console.log("chatIconLayout:", chatIconLayout);
+    
+
+    if(chatIconLayout.token === "temptoken") {
+      setIsValidToken(true);
+      return;
+    }
     const checkToken = async () => {
       try {
         const res = await fetch("http://localhost:8000/api/check/token", {

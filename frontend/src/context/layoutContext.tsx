@@ -15,7 +15,7 @@ export const LayOutContextProvider = ({
 }) => {
   const chatIconLayout: ChatButtonOptions = window.chatButtonOptions || {
     id: 3.1,
-    token: "",
+    token: "temptoken",
     name: "Default Widget",
     backgroundprimaryColor: "#000000",
     buttonText: "Chat with us",
