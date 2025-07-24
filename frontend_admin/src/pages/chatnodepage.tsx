@@ -3,6 +3,7 @@ import type React from "react"
 import { ReactFlowProvider } from "reactflow"
 import { useCallback, useEffect, useRef, useState } from "react"
 import ReactFlow, { Background, Controls, useEdgesState, useNodesState, addEdge } from "reactflow"
+import toast, { Toaster } from "react-hot-toast"
 
 import type { Connection, Node, OnSelectionChangeParams } from "reactflow"
 import "reactflow/dist/style.css"
@@ -47,13 +48,15 @@ const ChatNodePage = () => {
     if (!type) return
 
     if (type === "custom" && nodes.some((n) => n.type === "custom")) {
-      alert("Only one form widget is allowed.")
-      return
+      toast.dismiss("form-widget-error");
+      toast.error("Only one form widget is allowed.", { id: "form-widget-error" });
+      return;
     }
 
     if (type === "output" && nodes.some((n) => n.type === "output")) {
-      alert("Only one output widget is allowed.")
-      return
+      toast.dismiss("output-widget-error");
+      toast.error("Only one output widget is allowed.", { id: "output-widget-error" });
+      return;
     }
 
     const position = reactFlowInstance.project({
@@ -91,16 +94,17 @@ const ChatNodePage = () => {
                 (e.target === nodeId && nds.find((n) => n.id === e.source)?.type === "output"),
             )
             if (!connectedEdge) {
-              alert("Please connect the form to an output widget before submitting.")
-              return nds
+              toast.dismiss("connect-error");
+              toast.error("Please connect the form to an output widget before submitting.", { id: "connect-error" });
+              return nds;
             }
 
             const outputNodeId = connectedEdge.source === nodeId ? connectedEdge.target : connectedEdge.source
 
             const outputNode = nds.find((n) => n.id === outputNodeId)
             if (!outputNode || outputNode.type !== "output") {
-              alert("Connected node is not an output widget.")
-              return nds
+              toast.error("Connected node is not an output widget.");
+              return nds;
             }
 
             // Update output node with form data
@@ -148,13 +152,14 @@ const ChatNodePage = () => {
 
   return (
     <ReactFlowProvider>
+      <Toaster position="top-right" />
       <div className="flex flex-col md:flex-row w-screen h-screen overflow-hidden">
         {/* Sidebar */}
         <div className="w-full md:w-72 bg-gray-100 border-r p-4 space-y-6 overflow-y-auto md:shrink-0">
           <h2 className="text-lg font-semibold text-center">Nodes</h2>
 
           {/* Draggable Form Widget */}
-          <div
+          {/* <div
             className="cursor-move"
             draggable
             onDragStart={(event) => {
@@ -196,9 +201,24 @@ const ChatNodePage = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Draggable Output Widget */}
+          <div
+            className="cursor-move"
+            draggable
+            onDragStart={(event) => {
+              event.dataTransfer.setData("application/reactflow", "custom")
+              event.dataTransfer.effectAllowed = "move"
+            }}
+          >
+            <div className="pointer-events-none opacity-80 scale-95">
+              <div className="w-full rounded-xl border border-gray-300 bg-white shadow p-4 text-sm">
+                <strong>Trigger Widget</strong>
+                <p className="text-gray-500">Triggers a flow</p>
+              </div>
+            </div>
+          </div>
           <div
             className="cursor-move"
             draggable
