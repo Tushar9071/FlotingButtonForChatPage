@@ -1,263 +1,241 @@
-import type React from "react"
 
-import { ReactFlowProvider } from "reactflow"
-import { useCallback, useEffect, useRef, useState } from "react"
-import ReactFlow, { Background, Controls, useEdgesState, useNodesState, addEdge } from "reactflow"
-import toast, { Toaster } from "react-hot-toast"
+import React, { useCallback, useRef, useState } from "react";
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  useEdgesState,
+  useNodesState,
+  ReactFlowProvider,
+} from "reactflow";
+import type { Node, Edge, Connection, NodeTypes } from "reactflow";
+import "reactflow/dist/style.css";
+import {
+  TriggerNode,
+  PreviewNode,
+  SuccessNode,
+  CancelNode,
+  PriveNode,
+} from "../components/ReactFlowNodes";
 
-import type { Connection, Node, OnSelectionChangeParams } from "reactflow"
-import "reactflow/dist/style.css"
-import FormWidget from "./formwidget"
-import OutputWidget from "./outputwidget"
+const nodeTypes: NodeTypes = {
+  trigger: TriggerNode,
+  preview: PreviewNode,
+  success: SuccessNode,
+  cancel: CancelNode,
+  prive: PriveNode,
+};
 
-// Custom Node Types
-const nodeTypes = {
-  custom: FormWidget,
-  output: OutputWidget,
-}
+const initialNodes: Node[] = [];
+const initialEdges: Edge[] = [];
 
-let id = 0
-const getId = () => `${id++}`
+
+const nodeSidebar = [
+  { type: "trigger", label: "Trigger Node" },
+  { type: "preview", label: "Preview Node" },
+  { type: "success", label: "Success Node" },
+  { type: "cancel", label: "Cancel Node" },
+  { type: "prive", label: "Prive Node" },
+];
+
+const getId = (() => {
+  let id = 0;
+  return () => `${++id}`;
+})();
+
 
 const ChatNodePage = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
-  const [selectedEdges, setSelectedEdges] = useState<string[]>([])
-  const [selectedNodes, setSelectedNodes] = useState<string[]>([])
-  const reactFlowWrapper = useRef(null)
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
-  const edgesRef = useRef(edges)
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [messageMap, setMessageMap] = useState<Record<string, string>>({});
+  const [highlightNode, setHighlightNode] = useState<string | null>(null);
 
-  // Keep edgesRef.current updated with the latest edges state
-  useEffect(() => {
-    edgesRef.current = edges
-  }, [edges])
+  // Helper to find if two nodes are connected
+  const isConnected = useCallback(
+    (sourceId: string, targetId: string) => {
+      return edges.some((e) => e.source === sourceId && e.target === targetId);
+    },
+    [edges]
+  );
 
-  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges])
+  // Update node data for all nodes
+  React.useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.type === "trigger") {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              message: messageMap[node.id] || "",
+              onChange: (msg: string) => setMessageMap((m) => ({ ...m, [node.id]: msg })),
+            },
+          };
+        }
+        if (node.type === "preview") {
+          // Find connected trigger node
+          const triggerEdge = edges.find((e) => e.target === node.id && nds.find((n) => n.id === e.source && n.type === "trigger"));
+          const triggerId = triggerEdge ? triggerEdge.source : undefined;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              message: triggerId ? messageMap[triggerId] || "" : "",
+              onSend: () => {},
+              onCancel: () => {},
+            },
+          };
+        }
+        if (node.type === "success") {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              highlight: highlightNode === node.id,
+            },
+          };
+        }
+        if (node.type === "cancel") {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              highlight: highlightNode === node.id,
+            },
+          };
+        }
+        if (node.type === "prive") {
+          // Find connected preview node
+          const previewEdge = edges.find((e) => e.target === node.id && nds.find((n) => n.id === e.source && n.type === "preview"));
+          const previewId = previewEdge ? previewEdge.source : undefined;
+          // Find connected trigger node to preview
+          let message = "";
+          if (previewId) {
+            const triggerEdge = edges.find((e) => e.target === previewId && nds.find((n) => n.id === e.source && n.type === "trigger"));
+            const triggerId = triggerEdge ? triggerEdge.source : undefined;
+            if (triggerId) message = messageMap[triggerId] || "";
+          }
+          // Find connected success and cancel nodes
+          const successEdge = edges.find((e) => e.source === node.id && nds.find((n) => n.id === e.target && n.type === "success"));
+          const cancelEdge = edges.find((e) => e.source === node.id && nds.find((n) => n.id === e.target && n.type === "cancel"));
+          const successId = successEdge ? successEdge.target : undefined;
+          const cancelId = cancelEdge ? cancelEdge.target : undefined;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              onSend: () => {
+                if (successId) {
+                  setHighlightNode(successId);
+                  setTimeout(() => setHighlightNode(null), 1000);
+                }
+                alert(`Send Success! Message: ${message}`);
+              },
+              onCancel: () => {
+                if (cancelId) {
+                  setHighlightNode(cancelId);
+                  setTimeout(() => setHighlightNode(null), 1000);
+                }
+                alert("Task Cancelled!");
+              },
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [messageMap, setNodes, edges, highlightNode]);
+
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  // Drag and drop handlers
+  const onDragStart = (event: React.DragEvent, nodeType: string) => {
+    event.dataTransfer.setData("application/reactflow", nodeType);
+    event.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
+      const type = event.dataTransfer.getData("application/reactflow");
+      if (!type || !reactFlowBounds) return;
+      // Clamp position to keep nodes close to the drop area and not too far
+      let x = event.clientX - reactFlowBounds.left;
+      let y = event.clientY - reactFlowBounds.top;  
+      // Clamp to min 40, max 600 (adjust as needed for your canvas size)
+      x = Math.max(40, Math.min(x, 600));
+      y = Math.max(40, Math.min(y, 400));
+      const position = { x, y };
+      let data: any = {};
+      if (type === "trigger") data = { message: "", onChange: () => {} };
+      if (type === "preview") data = { message: "", onSend: () => {}, onCancel: () => {} };
+      if (type === "prive") data = { onSend: () => {}, onCancel: () => {} };
+      const newNode: Node = {
+        id: getId(),
+        type,
+        position,
+        data,
+      };
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [setNodes]
+  );
 
   const onDragOver = (event: React.DragEvent) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = "move"
-  }
-
-  const onDrop = (event: React.DragEvent) => {
-    event.preventDefault()
-    if (!reactFlowInstance) return
-
-    const type = event.dataTransfer.getData("application/reactflow")
-    if (!type) return
-
-    if (type === "custom" && nodes.some((n) => n.type === "custom")) {
-      toast.dismiss("form-widget-error");
-      toast.error("Only one form widget is allowed.", { id: "form-widget-error" });
-      return;
-    }
-
-    if (type === "output" && nodes.some((n) => n.type === "output")) {
-      toast.dismiss("output-widget-error");
-      toast.error("Only one output widget is allowed.", { id: "output-widget-error" });
-      return;
-    }
-
-    const position = reactFlowInstance.project({
-      x: event.clientX - (reactFlowWrapper.current as any).getBoundingClientRect().left,
-      y: event.clientY - (reactFlowWrapper.current as any).getBoundingClientRect().top,
-    })
-
-    const newId = getId()
-
-    const newNode: Node = {
-      id: newId,
-      type,
-      position,
-      data: {
-        title: `Node ${newId}`,
-        formData: {
-          optionA: false,
-          valueA: "",
-          optionB: false,
-          valueB: "",
-        },
-        onChange: (val: string) =>
-          setNodes((nds) => nds.map((n) => (n.id === newId ? { ...n, data: { ...n.data, title: val } } : n))),
-        onFormChange: (formData: any) =>
-          setNodes((nds) => nds.map((n) => (n.id === newId ? { ...n, data: { ...n.data, formData } } : n))),
-        onSubmit: (nodeId: string) => {
-          setNodes((nds) => {
-            const formNode = nds.find((n) => n.id === nodeId)
-            if (!formNode) return nds
-
-            // Use edgesRef.current for latest edges
-            const connectedEdge = edgesRef.current.find(
-              (e) =>
-                (e.source === nodeId && nds.find((n) => n.id === e.target)?.type === "output") ||
-                (e.target === nodeId && nds.find((n) => n.id === e.source)?.type === "output"),
-            )
-            if (!connectedEdge) {
-              toast.dismiss("connect-error");
-              toast.error("Please connect the form to an output widget before submitting.", { id: "connect-error" });
-              return nds;
-            }
-
-            const outputNodeId = connectedEdge.source === nodeId ? connectedEdge.target : connectedEdge.source
-
-            const outputNode = nds.find((n) => n.id === outputNodeId)
-            if (!outputNode || outputNode.type !== "output") {
-              toast.error("Connected node is not an output widget.");
-              return nds;
-            }
-
-            // Update output node with form data
-            const newFormData = formNode.data?.formData
-            return nds.map((n) => (n.id === outputNodeId ? { ...n, data: { ...n.data, formData: newFormData } } : n))
-          })
-        },
-      },
-    }
-
-    setNodes((nds) => nds.concat(newNode))
-  }
-
-  const handleDeleteKey = useCallback(
-    (event: KeyboardEvent) => {
-      const activeElement = document.activeElement
-      const isInputFocused =
-        activeElement?.tagName === "INPUT" ||
-        activeElement?.tagName === "TEXTAREA" ||
-        (activeElement as HTMLElement)?.isContentEditable
-
-      if (isInputFocused) return
-
-      if (event.key === "Delete" || event.key === "Backspace") {
-        setEdges((eds) => eds.filter((e) => !selectedEdges.includes(e.id)))
-        setNodes((nds) => nds.filter((n) => !selectedNodes.includes(n.id)))
-        setSelectedEdges([])
-        setSelectedNodes([])
-      }
-    },
-    [selectedEdges, selectedNodes],
-  )
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleDeleteKey)
-    return () => window.removeEventListener("keydown", handleDeleteKey)
-  }, [handleDeleteKey])
-
-  const handleSelectionChange = useCallback((params: OnSelectionChangeParams) => {
-    const edgeIds = params.edges?.map((e) => e.id) || []
-    const nodeIds = params.nodes?.map((n) => n.id) || []
-    setSelectedEdges(edgeIds)
-    setSelectedNodes(nodeIds)
-  }, [])
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  };
 
   return (
-    <ReactFlowProvider>
-      <Toaster position="top-right" />
-      <div className="flex flex-col md:flex-row w-screen h-screen overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-full md:w-72 bg-gray-100 border-r p-4 space-y-6 overflow-y-auto md:shrink-0">
-          <h2 className="text-lg font-semibold text-center">Nodes</h2>
-
-          {/* Draggable Form Widget */}
-          {/* <div
-            className="cursor-move"
-            draggable
-            onDragStart={(event) => {
-              event.dataTransfer.setData("application/reactflow", "custom")
-              event.dataTransfer.effectAllowed = "move"
-            }}
-          >
-            <div className="pointer-events-none opacity-80 scale-95">
-              <div className="w-full rounded-xl border border-gray-300 bg-white shadow-lg p-4 flex flex-col gap-4 transition-all duration-300 hover:shadow-xl relative">
-                <input
-                  type="text"
-                  className="w-full text-center text-lg font-semibold text-gray-800 bg-transparent border-b border-gray-300 focus:outline-none"
-                />
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Enable Option A</label>
-                    <input type="checkbox" className="accent-blue-600 w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Enter value A"
-                    className="w-full border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Enable Option B</label>
-                    <input type="checkbox" className="accent-blue-600 w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Enter value B"
-                    className="w-full border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                </div>
-
-                <button className="mt-2 bg-blue-600 text-white text-sm py-2 px-4 rounded hover:bg-blue-700 transition">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </div> */}
-
-          {/* Draggable Output Widget */}
+    <div style={{ width: "100vw", height: "100vh", display: "flex" }}>
+      <div style={{ width: 180, background: "#f3f4f6", padding: 16, borderRight: "1px solid #ddd" }}>
+        <div className="font-bold mb-4">Nodes</div>
+        {nodeSidebar.map((node) => (
           <div
-            className="cursor-move"
+            key={node.type}
+            onDragStart={(event) => onDragStart(event, node.type)}
             draggable
-            onDragStart={(event) => {
-              event.dataTransfer.setData("application/reactflow", "custom")
-              event.dataTransfer.effectAllowed = "move"
+            style={{
+              padding: "8px 12px",
+              marginBottom: 8,
+              background: "#fff",
+              border: "1px solid #bbb",
+              borderRadius: 6,
+              cursor: "grab",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
             }}
           >
-            <div className="pointer-events-none opacity-80 scale-95">
-              <div className="w-full rounded-xl border border-gray-300 bg-white shadow p-4 text-sm">
-                <strong>Trigger Widget</strong>
-                <p className="text-gray-500">Triggers a flow</p>
-              </div>
-            </div>
+            {node.label}
           </div>
-          <div
-            className="cursor-move"
-            draggable
-            onDragStart={(event) => {
-              event.dataTransfer.setData("application/reactflow", "output")
-              event.dataTransfer.effectAllowed = "move"
-            }}
-          >
-            <div className="pointer-events-none opacity-80 scale-95">
-              <div className="w-full rounded-xl border border-gray-300 bg-white shadow p-4 text-sm">
-                <strong>Output Widget</strong>
-                <p className="text-gray-500">Shows submitted values</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Flow Area */}
-        <div className="flex-1 relative" ref={reactFlowWrapper}>
+        ))}
+      </div>
+      <div ref={reactFlowWrapper} style={{ flex: 1, height: "100vh" }}>
+        <ReactFlowProvider>
           <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onSelectionChange={handleSelectionChange}
             nodeTypes={nodeTypes}
             fitView
+            onDrop={onDrop}
+            onDragOver={onDragOver}
           >
-            <Background />
+            <MiniMap />
             <Controls />
+            <Background />
           </ReactFlow>
-        </div>
+        </ReactFlowProvider>
       </div>
-    </ReactFlowProvider>
-  )
-}
+    </div>
+  );
+};
 
-export default ChatNodePage
+export default ChatNodePage;
