@@ -1,4 +1,3 @@
-
 import React, { useCallback, useRef, useState } from "react";
 import ReactFlow, {
   Background,
@@ -11,6 +10,7 @@ import ReactFlow, {
 } from "reactflow";
 import type { Node, Edge, Connection, NodeTypes } from "reactflow";
 import "reactflow/dist/style.css";
+import { toast, Toaster } from "react-hot-toast";
 import {
   TriggerNode,
   PreviewNode,
@@ -30,7 +30,6 @@ const nodeTypes: NodeTypes = {
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
 
-
 const nodeSidebar = [
   { type: "trigger", label: "Trigger Node" },
   { type: "preview", label: "Preview Node" },
@@ -44,7 +43,6 @@ const getId = (() => {
   return () => `${++id}`;
 })();
 
-
 const ChatNodePage = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -52,7 +50,6 @@ const ChatNodePage = () => {
   const [messageMap, setMessageMap] = useState<Record<string, string>>({});
   const [highlightNode, setHighlightNode] = useState<string | null>(null);
 
-  // Helper to find if two nodes are connected
   const isConnected = useCallback(
     (sourceId: string, targetId: string) => {
       return edges.some((e) => e.source === sourceId && e.target === targetId);
@@ -60,7 +57,6 @@ const ChatNodePage = () => {
     [edges]
   );
 
-  // Update node data for all nodes
   React.useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => {
@@ -70,13 +66,18 @@ const ChatNodePage = () => {
             data: {
               ...node.data,
               message: messageMap[node.id] || "",
-              onChange: (msg: string) => setMessageMap((m) => ({ ...m, [node.id]: msg })),
+              onChange: (msg: string) =>
+                setMessageMap((m) => ({ ...m, [node.id]: msg })),
             },
           };
         }
+
         if (node.type === "preview") {
-          // Find connected trigger node
-          const triggerEdge = edges.find((e) => e.target === node.id && nds.find((n) => n.id === e.source && n.type === "trigger"));
+          const triggerEdge = edges.find(
+            (e) =>
+              e.target === node.id &&
+              nds.find((n) => n.id === e.source && n.type === "trigger")
+          );
           const triggerId = triggerEdge ? triggerEdge.source : undefined;
           return {
             ...node,
@@ -88,7 +89,8 @@ const ChatNodePage = () => {
             },
           };
         }
-        if (node.type === "success") {
+
+        if (node.type === "success" || node.type === "cancel") {
           return {
             ...node,
             data: {
@@ -97,31 +99,39 @@ const ChatNodePage = () => {
             },
           };
         }
-        if (node.type === "cancel") {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              highlight: highlightNode === node.id,
-            },
-          };
-        }
+
         if (node.type === "prive") {
-          // Find connected preview node
-          const previewEdge = edges.find((e) => e.target === node.id && nds.find((n) => n.id === e.source && n.type === "preview"));
+          const previewEdge = edges.find(
+            (e) =>
+              e.target === node.id &&
+              nds.find((n) => n.id === e.source && n.type === "preview")
+          );
           const previewId = previewEdge ? previewEdge.source : undefined;
-          // Find connected trigger node to preview
+
           let message = "";
           if (previewId) {
-            const triggerEdge = edges.find((e) => e.target === previewId && nds.find((n) => n.id === e.source && n.type === "trigger"));
+            const triggerEdge = edges.find(
+              (e) =>
+                e.target === previewId &&
+                nds.find((n) => n.id === e.source && n.type === "trigger")
+            );
             const triggerId = triggerEdge ? triggerEdge.source : undefined;
             if (triggerId) message = messageMap[triggerId] || "";
           }
-          // Find connected success and cancel nodes
-          const successEdge = edges.find((e) => e.source === node.id && nds.find((n) => n.id === e.target && n.type === "success"));
-          const cancelEdge = edges.find((e) => e.source === node.id && nds.find((n) => n.id === e.target && n.type === "cancel"));
+
+          const successEdge = edges.find(
+            (e) =>
+              e.source === node.id &&
+              nds.find((n) => n.id === e.target && n.type === "success")
+          );
+          const cancelEdge = edges.find(
+            (e) =>
+              e.source === node.id &&
+              nds.find((n) => n.id === e.target && n.type === "cancel")
+          );
           const successId = successEdge ? successEdge.target : undefined;
           const cancelId = cancelEdge ? cancelEdge.target : undefined;
+
           return {
             ...node,
             data: {
@@ -131,18 +141,19 @@ const ChatNodePage = () => {
                   setHighlightNode(successId);
                   setTimeout(() => setHighlightNode(null), 1000);
                 }
-                alert(`Send Success! Message: ${message}`);
+                toast.success(`Send Success! Message: ${message}`);
               },
               onCancel: () => {
                 if (cancelId) {
                   setHighlightNode(cancelId);
                   setTimeout(() => setHighlightNode(null), 1000);
                 }
-                alert("Task Cancelled!");
+                toast.error("Task Cancelled!");
               },
             },
           };
         }
+
         return node;
       })
     );
@@ -153,7 +164,6 @@ const ChatNodePage = () => {
     [setEdges]
   );
 
-  // Drag and drop handlers
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
@@ -165,26 +175,35 @@ const ChatNodePage = () => {
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
       const type = event.dataTransfer.getData("application/reactflow");
       if (!type || !reactFlowBounds) return;
-      // Clamp position to keep nodes close to the drop area and not too far
+
+      if (type === "trigger" && nodes.some((node) => node.type === "trigger")) {
+        toast.error("Only one Trigger node is allowed.");
+        return;
+      }
+
       let x = event.clientX - reactFlowBounds.left;
-      let y = event.clientY - reactFlowBounds.top;  
-      // Clamp to min 40, max 600 (adjust as needed for your canvas size)
+      let y = event.clientY - reactFlowBounds.top;
+
       x = Math.max(40, Math.min(x, 600));
       y = Math.max(40, Math.min(y, 400));
       const position = { x, y };
+
       let data: any = {};
       if (type === "trigger") data = { message: "", onChange: () => {} };
-      if (type === "preview") data = { message: "", onSend: () => {}, onCancel: () => {} };
+      if (type === "preview")
+        data = { message: "", onSend: () => {}, onCancel: () => {} };
       if (type === "prive") data = { onSend: () => {}, onCancel: () => {} };
+
       const newNode: Node = {
         id: getId(),
         type,
         position,
         data,
       };
+
       setNodes((nds) => nds.concat(newNode));
     },
-    [setNodes]
+    [setNodes, nodes]
   );
 
   const onDragOver = (event: React.DragEvent) => {
@@ -193,48 +212,58 @@ const ChatNodePage = () => {
   };
 
   return (
-    <div style={{ width: "100vw", height: "100vh", display: "flex" }}>
-      <div style={{ width: 180, background: "#f3f4f6", padding: 16, borderRight: "1px solid #ddd" }}>
-        <div className="font-bold mb-4">Nodes</div>
-        {nodeSidebar.map((node) => (
-          <div
-            key={node.type}
-            onDragStart={(event) => onDragStart(event, node.type)}
-            draggable
-            style={{
-              padding: "8px 12px",
-              marginBottom: 8,
-              background: "#fff",
-              border: "1px solid #bbb",
-              borderRadius: 6,
-              cursor: "grab",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-            }}
-          >
-            {node.label}
-          </div>
-        ))}
+    <>
+      <Toaster position="top-center" />
+      <div style={{ width: "100vw", height: "100vh", display: "flex" }}>
+        <div
+          style={{
+            width: 180,
+            background: "#f3f4f6",
+            padding: 16,
+            borderRight: "1px solid #ddd",
+          }}
+        >
+          <div className="font-bold mb-4">Nodes</div>
+          {nodeSidebar.map((node) => (
+            <div
+              key={node.type}
+              onDragStart={(event) => onDragStart(event, node.type)}
+              draggable
+              style={{
+                padding: "8px 12px",
+                marginBottom: 8,
+                background: "#fff",
+                border: "1px solid #bbb",
+                borderRadius: 6,
+                cursor: "grab",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+              }}
+            >
+              {node.label}
+            </div>
+          ))}
+        </div>
+        <div ref={reactFlowWrapper} style={{ flex: 1, height: "100vh" }}>
+          <ReactFlowProvider>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              nodeTypes={nodeTypes}
+              fitView
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+            >
+              <MiniMap />
+              <Controls />
+              <Background />
+            </ReactFlow>
+          </ReactFlowProvider>
+        </div>
       </div>
-      <div ref={reactFlowWrapper} style={{ flex: 1, height: "100vh" }}>
-        <ReactFlowProvider>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            fitView
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-          >
-            <MiniMap />
-            <Controls />
-            <Background />
-          </ReactFlow>
-        </ReactFlowProvider>
-      </div>
-    </div>
+    </>
   );
 };
 
