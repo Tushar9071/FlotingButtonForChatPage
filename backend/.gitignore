@@ -1,2 +1,13 @@
-# created by virtualenv automatically
-.prettierignore
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pdb
+*.egg-info/
+dist/
+build/

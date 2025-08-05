@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { Handle, Position } from 'reactflow';
+import { memo } from "react";
+import { Handle, Position } from "reactflow";
 
 interface TriggerNodeProps {
   data: {
@@ -15,10 +15,14 @@ const TriggerNode = memo(({ data }: TriggerNodeProps) => {
       <textarea
         className="w-full border rounded p-2 mb-2"
         value={data.message}
-        onChange={e => data.onChange(e.target.value)}
+        onChange={(e) => data.onChange?.(e.target.value)}
         placeholder="Enter WhatsApp message..."
       />
-      <Handle type="source" position={Position.Right} />
+      <Handle
+        type="source"
+        className="w-5 h-5 bg-green-400 border-2 border-green-600 rounded-full shadow"
+        position={Position.Right}
+      />
     </div>
   );
 });

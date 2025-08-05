@@ -14,7 +14,7 @@ export const LayOutContextProvider = ({
   children: React.ReactNode;
 }) => {
   const chatIconLayout: ChatButtonOptions = window.chatButtonOptions || {
-    id: 3.1,
+    id: 11,
     token: "temptoken",
     name: "Default Widget",
     backgroundprimaryColor: "#000000",

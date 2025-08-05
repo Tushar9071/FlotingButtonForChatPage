@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import GenWidgetCode from "./genWidgetCode";
 import toast, { Toaster } from "react-hot-toast";
 import Chatbox1_1 from "./Chatbox1_1"; // Import the new Chatbox1_1 component
 
 const GenCDNPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id: 1.1,
     name: "",
@@ -20,6 +22,10 @@ const GenCDNPage = () => {
   });
   const [showCode, setShowCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // New loading state
+  
+  const goToFlowsPage = () => {
+    navigate('/flows');
+  };
 
   const handleChange = (key: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -137,6 +143,12 @@ const GenCDNPage = () => {
             <p className="mt-3 text-lg opacity-90">
               Seamlessly connect with your customers directly on WhatsApp.
             </p>
+            <button
+              onClick={goToFlowsPage}
+              className="mt-4 bg-white text-green-700 px-5 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors"
+            >
+              Manage Message Flows
+            </button>
           </div>
           {/* <div className="md:w-1/3 flex justify-center md:justify-end">
             <img

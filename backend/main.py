@@ -9,9 +9,15 @@ from sqlalchemy.orm import Session
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from . import models, database, schemas
+from route import chatApi
+import  database, schemas
+from models import models
+
+from route import reactflowApi
 
 app = FastAPI()
+app.include_router(reactflowApi.router)
+app.include_router(chatApi.router)
 
 
 models.Base.metadata.create_all(bind=database.engine)
@@ -34,7 +40,6 @@ app.add_middleware(
 
 @app.post('/api/add/user')
 async def add_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    # Check if email already exists
     existing_email_user = db.query(models.User).filter(models.User.email == user.email).first()
     if existing_email_user:
         raise HTTPException(
@@ -42,7 +47,6 @@ async def add_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             detail="User with this email already exists"
         )
 
-    # Check if phone already exists
     if user.phone:
         existing_phone_user = db.query(models.User).filter(models.User.phone == user.phone).first()
         if existing_phone_user:
@@ -51,9 +55,7 @@ async def add_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
                 detail="User with this phone number already exists"
             )
 
-    # Extract widget data
     data = user.data or {}
-    # generate token
     user_token = str(uuid.uuid4())
 
     brand_img = data.get("brandImg", "")
@@ -87,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {{
 &lt;/script&gt;"""
 
 
-    # Compose HTML
     mail_html = f"""<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="{brand_img}" alt="{brand_name}" style="max-height: 50px;"/>
@@ -109,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {{
 </div>"""
 
 
-    # Save new user
     new_user = models.User(
         email=user.email,
         phone=user.phone,
@@ -121,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {{
     db.commit()
     db.refresh(new_user)
 
-    # Send HTML email properly
     sender = "Private Person <from@example.com>"
     receiver = "A Test User <to@example.com>"
 
@@ -150,3 +149,4 @@ async def check_token(token: schemas.Token, db: Session = Depends(get_db)):
             detail="Invalid token"
         )
     return user
+

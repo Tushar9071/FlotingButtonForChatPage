@@ -31,6 +31,7 @@ import Chatbox9_1 from "./components/ui9/ui9_1/chatbox9_1";
 import Chatbox9_2 from "./components/ui9/ui9_2/chatbox9_2";
 import Chatbox9_3 from "./components/ui9/ui9_3/chatbox9_3";
 import Chatbox9_4 from "./components/ui9/ui9_4/chatbox9_4";
+import ChatboxTest from "./components/msg/Msg";
 
 function App() {
   const { chatIconLayout } = useLayOutConfig();
@@ -39,9 +40,8 @@ function App() {
 
   useEffect(() => {
     console.log("chatIconLayout:", chatIconLayout);
-    
 
-    if(chatIconLayout.token === "temptoken") {
+    if (chatIconLayout.token === "temptoken") {
       setIsValidToken(true);
       return;
     }
@@ -95,6 +95,7 @@ function App() {
     9.3: <Chatbox9_3 key="chatbox" />,
     9.4: <Chatbox9_4 key="chatbox" />,
     10: <Chatbox key="chatbox" />,
+    11: <ChatboxTest key="chatbox" />,
   };
 
   return (

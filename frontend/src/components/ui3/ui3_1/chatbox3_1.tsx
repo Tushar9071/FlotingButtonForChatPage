@@ -13,16 +13,19 @@ const Chatbox3_1 = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.1 }}
-      className="fixed bottom-20 bg-transparent right-6 rounded-full">
+      className="fixed bottom-20 bg-transparent right-6 rounded-full"
+    >
       <div
-        className={`sm:bottom-[70px] right-6 z-50 h-auto w-auto  rounded-2xl shadow-lg overflow-hidden`}>
+        className={`sm:bottom-[70px] right-6 z-50 h-auto w-auto  rounded-2xl shadow-lg overflow-hidden`}
+      >
         <ChatHeader />
         <div
           className={`w-full py-4 `}
           style={{
             backgroundImage: `url(${background})`,
             backgroundSize: "cover",
-          }}>
+          }}
+        >
           <div className="flex flex-col w-80  gap-4 rounded-lg px-5">
             {/* Left-aligned message */}
             <div className="flex justify-start">
@@ -54,7 +57,7 @@ const Chatbox3_1 = () => {
           <div className="px-5 flex flex-col gap-1">
             <ChatInput />
             <div className="flex justify-center">
-              <SendMessageBtn/>
+              <SendMessageBtn />
             </div>
           </div>
         </div>
