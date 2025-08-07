@@ -18,6 +18,7 @@ import {
   SuccessNode,
   CancelNode,
   PriveNode,
+  ResponseNode,
 } from "../components/ReactFlowNodes";
 import AnswerNode from "../components/ReactFlowNodes/AnswerNode";
 
@@ -28,6 +29,7 @@ const nodeTypes: NodeTypes = {
   cancel: CancelNode,
   prive: PriveNode,
   answer: AnswerNode,
+  response: ResponseNode,
 };
 
 const initialNodes: Node[] = [];
@@ -40,6 +42,7 @@ const nodeSidebar = [
   { type: "cancel", label: "Cancel Node" },
   { type: "prive", label: "Prive Node" },
   { type: "answer", label: "Answer Node" },
+  { type: "response", label: "Response Node" },
 ];
 
 const getId = (() => {
@@ -59,6 +62,9 @@ const ChatNodePage = () => {
   const [flowDescription, setFlowDescription] = useState<string>("");
   const [answerMessageMap, setAnswerMessageMap] = useState<
     Record<string, string>
+  >({});
+  const [responseMessageMap, setResponseMessageMap] = useState<
+    Record<string, { userMessage: string; botResponse: string }>
   >({});
 
   // Load flow data if we have a flowId
@@ -81,6 +87,10 @@ const ChatNodePage = () => {
             // Reconstruct the message map from nodes
             const newMessageMap: Record<string, string> = {};
             const newAnswerMessageMap: Record<string, string> = {};
+            const newResponseMessageMap: Record<
+              string,
+              { userMessage: string; botResponse: string }
+            > = {};
             data.nodes.forEach((node: Node) => {
               if (node.type === "trigger" && node.data && node.data.message) {
                 newMessageMap[node.id] = node.data.message;
@@ -88,9 +98,16 @@ const ChatNodePage = () => {
               if (node.type === "answer" && node.data && node.data.message) {
                 newAnswerMessageMap[node.id] = node.data.message;
               }
+              if (node.type === "response" && node.data) {
+                newResponseMessageMap[node.id] = {
+                  userMessage: node.data.userMessage || "",
+                  botResponse: node.data.botResponse || "",
+                };
+              }
             });
             setMessageMap(newMessageMap);
             setAnswerMessageMap(newAnswerMessageMap);
+            setResponseMessageMap(newResponseMessageMap);
 
             // Set flow description if available
             if (data.description) {
@@ -167,7 +184,6 @@ const ChatNodePage = () => {
             },
           };
         }
-        
 
         if (node.type === "preview") {
           const triggerEdge = edges.find(
@@ -263,10 +279,45 @@ const ChatNodePage = () => {
           };
         }
 
+        if (node.type === "response") {
+          const responseData = responseMessageMap[node.id] || {
+            userMessage: "",
+            botResponse: "",
+          };
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              userMessage: responseData.userMessage,
+              botResponse: responseData.botResponse,
+              onUserMessageChange: (msg: string) =>
+                setResponseMessageMap((m) => ({
+                  ...m,
+                  [node.id]: { ...responseData, userMessage: msg },
+                })),
+              onBotResponseChange: (msg: string) =>
+                setResponseMessageMap((m) => ({
+                  ...m,
+                  [node.id]: { ...responseData, botResponse: msg },
+                })),
+            },
+          };
+        }
+
         return node;
       })
     );
-  }, [messageMap, setNodes, edges, highlightNode, answerMessageMap]);
+  }, [
+    messageMap,
+    setNodes,
+    edges,
+    highlightNode,
+    answerMessageMap,
+    responseMessageMap,
+    // updateMessageMap,
+    // updateAnswerMessageMap,
+    // updateResponseMessageMap,
+  ]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -303,6 +354,20 @@ const ChatNodePage = () => {
         data = { message: "", onSend: () => {}, onCancel: () => {} };
       if (type === "prive") data = { onSend: () => {}, onCancel: () => {} };
       if (type === "answer") data = { message: "", onAnswerChange: () => {} };
+      if (type === "response")
+        data = {
+          userMessage: "",
+          botResponse: "",
+          onUserMessageChange: () => {},
+          onBotResponseChange: () => {},
+        };
+      if (type === "response")
+        data = {
+          userMessage: "",
+          botResponse: "",
+          onUserMessageChange: () => {},
+          onBotResponseChange: () => {},
+        };
 
       const newNode: Node = {
         id: getId(),

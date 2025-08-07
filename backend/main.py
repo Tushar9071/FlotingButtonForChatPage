@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from route import chatApi
+from route import buttonsApi
 import  database, schemas
 from models import models
 
@@ -18,6 +19,7 @@ from route import reactflowApi
 app = FastAPI()
 app.include_router(reactflowApi.router)
 app.include_router(chatApi.router)
+app.include_router(buttonsApi.router)
 
 
 models.Base.metadata.create_all(bind=database.engine)
